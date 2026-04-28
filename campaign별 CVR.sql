@@ -1,4 +1,4 @@
-WITH base AS (
+with base AS (
   SELECT 
     user_pseudo_id,
     event_name,
