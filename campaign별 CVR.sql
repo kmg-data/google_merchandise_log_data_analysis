@@ -1,4 +1,4 @@
-with base AS (
+WITH base AS (
   SELECT 
     user_pseudo_id,
     event_name,
@@ -32,8 +32,7 @@ SELECT
   -- 7일 이내에 해당 유저가 purchase를 한 기록이 하나라도 있다면 1
   MAX(CASE WHEN b.event_name = 'purchase' THEN 1 ELSE 0 END) AS flag
 FROM target_events t
--- 캠페인 유입 시점(campaign_ts) 이후 7일 이내의 모든 활동(b)을 가져오되, 
--- 조인 조건에 campaign을 넣지 않아서 b의 campaign이 null이어도 다 살아남음!
+-- 캠페인 유입 시점(campaign_ts) 이후 7일 이내의 모든 활동(b)을 가져옴
 JOIN base b ON t.user_pseudo_id = b.user_pseudo_id
 WHERE b.event_timestamp BETWEEN t.campaign_ts AND (t.campaign_ts + 7 * 24 * 60 * 60 * 1000000)
 GROUP BY 1,2,3,4,5
@@ -41,10 +40,10 @@ ORDER BY flag DESC, t.user_pseudo_id, b.event_date)
 
 -- 3. CVR 계산 
 SELECT 
-first_campaign, 
+first_campaign as campaign, 
 COUNT(*)as session_count, 
 COUNTIF(flag=1)as conversion,
-AVG(flag)as cvr
+round(AVG(flag),2)as cvr
 FROM session
 GROUP BY 1
 ORDER BY 4 desc,1
